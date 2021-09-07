@@ -1,0 +1,27 @@
+SELECT
+	a.[Database_id] as [ID]
+,	a.[name] as [DBNAME]
+,	b.[name] as [Logical_Name]
+,	CASE
+		WHEN b.[groupid] = 1 THEN 'PRIMARY'
+		WHEN b.[groupid] = 0 THEN 'Log'
+			ELSE 'Other Groups'
+	END as [FileGroup]
+,	CASE
+		WHEN b.[fileid] =  1 THEN 'mdf'
+		WHEN b.[fileid] = 2 THEN 'ldf'
+		WHEN b.[fileid] >= 3 THEN 'ndf'
+	END as [FileType]
+,	b.[filename] as [FilePath]
+,	CONVERT(nvarchar(100), CAST((c.[Size] / 128.0) as decimal(38,2))) + 'MB' as [TotalSize]
+,	CASE
+		WHEN c.[is_percent_growth] = 0 THEN CONVERT(nvarchar(100), CAST((c.[growth] / 128.0) as decimal(38,2))) + 'MB' 
+			ELSE CONVERT(nvarchar(100), c.[growth]) + '%' 
+	END as [Auto_Growth]
+,	CONVERT(nvarchar(100), CAST(FILEPROPERTY(c.[name], 'SpaceUsed') / 128.0  as decimal(38,2))) + 'MB' as [UsedSize]
+,	CONVERT(nvarchar(100), CAST(c.[size] / 128.0 - FILEPROPERTY(c.[name], 'SpaceUsed') / 128.0 as decimal(38,2))) + 'MB' as [FreeSpace]
+FROM sys.databases(NOLOCK) a
+	INNER JOIN sys.sysaltfiles(NOLOCK) b
+		ON a.[database_id] = b.[dbid]
+	INNER JOIN sys.database_files(NOLOCK) c
+ON b.[name] = c.[name] COLLATE DATABASE_DEFAULT
