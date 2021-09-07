@@ -1,0 +1,22 @@
+select
+	A.[media_set_id] as ID
+,	C.[Database_Name]
+,	B.[Physical_device_name] as File_Path
+,	replace(convert(nvarchar(200), cast(C.[Backup_Size] / 1024+9 as money),1),'.00', '') + ' KB' as [FileSize]
+,	CASE C.[Type]
+		WHEN 'D' THEN 'Full'
+		WHEN 'L' THEN 'Log'
+		WHEN 'I' THEN 'Diff'
+		end as [Type]
+,	convert(char(19), C.[Backup_start_date], 120) as StartDate
+,	convert(char(19), C.[Backup_finish_date], 120) as FinishDate
+,	A.[is_compressed]
+,	C.[is_snapshot]
+,	C.[is_Damaged]
+,	C.[begins_Log_Chain]
+From msdb.dbo.backupmediaset A (nolock)
+	INNER JOIN msdb.dbo.backupmediafamily B (nolock)
+		ON (A.media_set_id = B.media_set_id)
+	INNER JOIN msdb.dbo.backupset C (nolock)
+		ON (B.media_set_id = C.media_set_id)
+order by C.[database_name]
