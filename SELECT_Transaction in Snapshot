@@ -1,0 +1,14 @@
+IF EXISTS (select * from sys.databases where is_read_committed_snapshot_on = 1)
+SELECT
+	db_name(b.[database_id]) as dbname
+,	a.[session_id] as spid
+,	a.[transaction_id]
+,	b.[program_name]
+,	d.[Text] as [SQL]
+,	a.elapsed_time_seconds
+FROM sys.dm_tran_active_snapshot_database_transactions a
+		INNER JOIN sys.dm_exec_sessions b
+		ON a.session_id = b.session_id
+		  LEFT OUTER JOIN sys.dm_exec_connections c 
+		 ON c.session_id = a.session_id
+OUTER APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) d
