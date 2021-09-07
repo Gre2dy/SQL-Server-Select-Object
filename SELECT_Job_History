@@ -1,0 +1,15 @@
+SELECT
+		A.name as JobName
+	,	C.database_name as TargetDB
+	,	B.start_execution_date as Job_Start_date
+	,	B.stop_execution_date as Job_Finish_date
+	,	C.step_name
+	,	c.step_id
+	,	C.last_run_duration as Step_Duration
+	,	C.command as SQL
+	FROM msdb.dbo.sysjobs as A
+		INNER JOIN msdb.dbo.sysjobactivity B 
+			ON (A.job_id = B.job_id)
+		INNER JOIN msdb.dbo.sysjobsteps C
+			ON (A.job_id = C.job_id)
+where A.name <> 'syspolicy_purge_history' and A.name  NOT LIKE  'SSIS%'
