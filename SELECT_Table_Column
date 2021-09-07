@@ -1,0 +1,10 @@
+SELECT
+    a.name as TableName
+,   a.object_id as OBJid
+,   b.name as ColumnName
+,   (select UPPER(name) from sys.types where user_type_id = b.user_type_id) + '(' + case convert(varchar(10), b.max_length) when -1 then 'MAX' else convert(varchar(10), b.max_length) end + ')' as DataType
+,   case when b.is_nullable = 0 then 'not null'
+        else 'null' end as is_null
+,   b.is_identity
+FROM sys.tables a
+    INNER JOIN sys.columns b on (a.object_id = b.object_id) order by b.object_id asc 
