@@ -1,0 +1,16 @@
+SELECT
+	a.SPID
+,	a.[Begin Time] as [Transaction Start Time]
+,	a.Operation
+,	a.[Transaction Name]
+,	a.AllocUnitName
+,	SUSER_SNAME(a.[Transaction SID]) as UserName
+,	b.program_name
+,	c.client_net_address 
+,	c.client_tcp_port
+FROM sys.fn_dblog(null,null) a 
+	INNER JOIN sys.dm_exec_sessions b
+		ON (a.SPID = b.session_id) 
+	INNER JOIN sys.dm_exec_connections c
+		ON (a.SPID = c.session_id)
+where [Transaction Name] IN ( 'INSERT','DELETE', 'UPDATE')
