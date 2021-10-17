@@ -1,0 +1,10 @@
+SELECT
+	session_id as spid
+,	db_name(database_id) as dbname
+,	status
+,	command
+,	B.text
+,	CONVERT(NUMERIC(10,2),A.total_elapsed_time/1000.0/60.0) AS [ETA Min]
+FROM sys.dm_exec_requests A
+	CROSS APPLY sys.dm_exec_sql_text(A.sql_handle) B
+WHERE A.session_id <> @@spid
