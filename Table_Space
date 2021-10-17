@@ -1,0 +1,12 @@
+SELECT
+	a.Name
+,	c.rows
+,	CAST(ROUND(((SUM(d.used_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2)) AS UsedSpaceMB
+	FROM sys.tables a
+		INNER JOIN sys.indexes b
+			ON(a.object_id = b.object_id)
+		INNER JOIN sys.partitions c
+			ON(b.object_id = c.object_id and b.index_id = c.index_id)
+		INNER JOIN sys.allocation_units d
+			ON(c.partition_id = d.container_id)
+GROUP BY a.Name, a.object_id, c.rows
